@@ -1,0 +1,28 @@
+/********************************************************************************************
+@author Bevis
+@date 2018-09-02
+
+/********************************************************************************************/
+#ifndef __BV_COMMON_H__
+#define __BV_COMMON_H__
+
+//接口返回值定义
+typedef enum
+{
+    BV_NO_ITEM = -7,                //队列或者链表没有元素了
+    BV_LIST_OVER = -6,              //链表溢出
+    BV_CREATE_LIST_FAILED = -5,     //创建链表失败
+    BV_CREATE_QUEUE_FAILED = -4,    //创建队列失败
+    BV_PARAM_ERROR = -3,            //函数入参错误
+    BV_MEM_LACK = -2,               //内存不足
+    BV_FAILED = -1,                 //失败
+    BV_SUCCESS,                      //成功
+}BV_RETURN;
+
+typedef enum 
+{
+    BV_FALSE = 0,
+    BV_TRUE = 1,
+}BV_BOOL;
+
+#endif //__BV_COMMON_H__
