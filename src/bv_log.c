@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 
 #define LOG_LEVEL_TAG 8
 
@@ -175,7 +176,7 @@ BV_RETURN bv_log(BV_LOG_HANDLE logHandle, BV_LOG_LEVEL logLevel, char* pcLogInfo
     }
     if (strlen(pcLogInfo) >= BV_LOG_INFO_LENGTH)
     {
-        return BV_LOG_LENGTH_ERROR;
+        pcLogInfo[BV_LOG_INFO_LENGTH - 1] = '\0';
     }
 
     //日志级别判断
@@ -199,6 +200,78 @@ BV_RETURN bv_log(BV_LOG_HANDLE logHandle, BV_LOG_LEVEL logLevel, char* pcLogInfo
         return BV_FAILED;
     }
     return BV_SUCCESS;
+}
+
+BV_RETURN bv_log_fatal(BV_LOG_HANDLE logHandle, char* pcLogInfo, ...)
+{
+    va_list arg;
+    char buffer[BV_LOG_INFO_LENGTH + 1] = {0};
+    
+    va_start(arg,pcLogInfo);
+    vsnprintf(buffer, BV_LOG_INFO_LENGTH, pcLogInfo, arg);
+    va_end(arg);
+
+    return bv_log(logHandle, BV_LOG_LEVEL_FATAL, buffer);
+}
+
+BV_RETURN bv_log_error(BV_LOG_HANDLE logHandle, char* pcLogInfo, ...)
+{
+    va_list arg;
+    char buffer[BV_LOG_INFO_LENGTH + 1] = {0};
+    
+    va_start(arg,pcLogInfo);
+    vsnprintf(buffer, BV_LOG_INFO_LENGTH, pcLogInfo, arg);
+    va_end(arg);
+
+    return bv_log(logHandle, BV_LOG_LEVEL_ERROR, buffer);
+}
+
+BV_RETURN bv_log_warn(BV_LOG_HANDLE logHandle, char* pcLogInfo, ...)
+{
+    va_list arg;
+    char buffer[BV_LOG_INFO_LENGTH + 1] = {0};
+    
+    va_start(arg,pcLogInfo);
+    vsnprintf(buffer, BV_LOG_INFO_LENGTH, pcLogInfo, arg);
+    va_end(arg);
+
+    return bv_log(logHandle, BV_LOG_LEVEL_WARN, buffer);
+}
+
+BV_RETURN bv_log_info(BV_LOG_HANDLE logHandle, char* pcLogInfo, ...)
+{
+    va_list arg;
+    char buffer[BV_LOG_INFO_LENGTH + 1] = {0};
+    
+    va_start(arg,pcLogInfo);
+    vsnprintf(buffer, BV_LOG_INFO_LENGTH, pcLogInfo, arg);
+    va_end(arg);
+
+    return bv_log(logHandle, BV_LOG_LEVEL_INFO, buffer);
+}
+
+BV_RETURN bv_log_debug(BV_LOG_HANDLE logHandle, char* pcLogInfo, ...)
+{
+    va_list arg;
+    char buffer[BV_LOG_INFO_LENGTH + 1] = {0};
+    
+    va_start(arg,pcLogInfo);
+    vsnprintf(buffer, BV_LOG_INFO_LENGTH, pcLogInfo, arg);
+    va_end(arg);
+
+    return bv_log(logHandle, BV_LOG_LEVEL_DEBUG, buffer);
+}
+
+BV_RETURN bv_log_trace(BV_LOG_HANDLE logHandle, char* pcLogInfo, ...)
+{
+    va_list arg;
+    char buffer[BV_LOG_INFO_LENGTH + 1] = {0};
+    
+    va_start(arg,pcLogInfo);
+    vsnprintf(buffer, BV_LOG_INFO_LENGTH, pcLogInfo, arg);
+    va_end(arg);
+
+    return bv_log(logHandle, BV_LOG_LEVEL_TRACE, buffer);
 }
 
 

@@ -81,29 +81,6 @@ BV_RETURN bv_log_set_level(BV_LOG_HANDLE logHandle, BV_LOG_LEVEL logLevel);
 
 /********************************************************************************************
 @函数名称:
-bv_log
-
-@函数功能:
-写log
-
-@函数参数:
-----IN
-logHandle:日志句柄
-logLevel:日志级别。
-pcLogInfo:当前支持log最大长度为1024字节(包含\0)。
-
-
-@函数返回值
-成功：BV_SUCCESS
-失败：其他值
-
-@注意
-如果不设置log级别，则默认级别为BV_LOG_LEVEL_ALL，既所有级别日志均保存。
-********************************************************************************************/
-BV_RETURN bv_log(BV_LOG_HANDLE logHandle, BV_LOG_LEVEL logLevel, char* pcLogInfo);
-
-/********************************************************************************************
-@函数名称:
 bv_log_set_thread_num
 
 @函数功能:
@@ -139,6 +116,59 @@ uiBlockSize:存储上限(单位：M)
 
 ********************************************************************************************/
 BV_RETURN bv_log_set_storage_block_size(BV_LOG_HANDLE logHandle, unsigned int uiBlockSize);
+
+/********************************************************************************************
+@函数名称:
+bv_log
+
+@函数功能:
+写log
+
+@函数参数:
+----IN
+logHandle:日志句柄
+logLevel:日志级别。
+pcLogInfo:当前支持log最大长度为1024字节(包含\0)。
+
+
+@函数返回值
+成功：BV_SUCCESS
+失败：其他值
+
+@注意
+如果不设置log级别，则默认级别为BV_LOG_LEVEL_ALL，既所有级别日志均保存。
+********************************************************************************************/
+BV_RETURN bv_log(BV_LOG_HANDLE logHandle, BV_LOG_LEVEL logLevel, char* pcLogInfo);
+
+
+/********************************************************************************************
+@函数名称:
+1,bv_log_fatal
+2,bv_log_error
+3,bv_log_warn
+4,bv_log_info
+5,bv_log_debug
+6,bv_log_trace
+
+@函数功能:
+输出对应LOG级别的函数。
+
+@函数参数:
+----IN
+logHandle:日志句柄
+pcLogInfo:
+...:可变参数
+
+@函数返回值
+成功：BV_SUCCESS
+失败：其他值
+********************************************************************************************/
+BV_RETURN bv_log_fatal(BV_LOG_HANDLE logHandle, char* pcLogInfo, ...);
+BV_RETURN bv_log_error(BV_LOG_HANDLE logHandle, char* pcLogInfo, ...);
+BV_RETURN bv_log_warn(BV_LOG_HANDLE logHandle, char* pcLogInfo, ...);
+BV_RETURN bv_log_info(BV_LOG_HANDLE logHandle, char* pcLogInfo, ...);
+BV_RETURN bv_log_debug(BV_LOG_HANDLE logHandle, char* pcLogInfo, ...);
+BV_RETURN bv_log_trace(BV_LOG_HANDLE logHandle, char* pcLogInfo, ...);
 
 #endif //__BV_LOG_H__
 
