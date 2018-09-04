@@ -6,4 +6,4 @@ TOP_DIR=../..
 INC_DIR=-I $(TOP_DIR)/include
 LIB_DIR=-L $(TOP_DIR)/lib
 
-LDFLAGS=-lBv
+LDFLAGS=-lBv -lrt

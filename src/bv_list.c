@@ -17,10 +17,13 @@ BV_LIST_HANDLE bv_list_create(unsigned long ulItemSize, unsigned int uiListLengt
     pstListHead pListHead = NULL;
     if (ulItemSize == 0)
     {
-        printf("%s(%d):BV_PARAM_ERROR\n", __FUNCTION__, __LINE__);
         return BV_PARAM_ERROR;
     }
     pListHead = (pstListHead)malloc(sizeof(stListHead));
+    if (pListHead == NULL)
+    {
+        return 0;
+    }
     pListHead->prev = pListHead;
     pListHead->next = pListHead;
     pListHead->uiListLength = uiListLength;
@@ -28,7 +31,6 @@ BV_LIST_HANDLE bv_list_create(unsigned long ulItemSize, unsigned int uiListLengt
     pListHead->itemCount = 0;
 
     //返回链表头指针
-    printf("%s(%d):pListHead=%p, ulItemSize=%d\n", __FUNCTION__, __LINE__, pListHead, ulItemSize);
     return (BV_LIST_HANDLE)pListHead;
 }
 
@@ -39,17 +41,15 @@ BV_RETURN bv_list_destroy(BV_LIST_HANDLE listHandle)
     pstListHead pListNode = pListHead->next;
     if (pListHead == NULL)
     {
-        printf("%s(%d):BV_PARAM_ERROR\n", __FUNCTION__, __LINE__);
         return BV_PARAM_ERROR;
     }
-    printf("%s(%d):itemCount=%d\n", __FUNCTION__, __LINE__, pListHead->itemCount);
     for (pListNode; pListNode != pListHead; pListNode = pListHead->next)
     {
         pListNode->prev->next = pListNode->next;
         pListNode->next->prev = pListNode->prev;
         free(pListNode);
+        pListNode = NULL;
         pListHead->itemCount--;
-        printf("%s(%d):itemCount=%d\n", __FUNCTION__, __LINE__);
     }
     free(pListHead);
     return BV_SUCCESS;
@@ -61,12 +61,10 @@ BV_RETURN bv_list_insert_node_from_head(BV_LIST_HANDLE listHandle, void *pvItem)
     pstListHead pListNode = (pstListHead)pvItem;
     if (pListHead == NULL || pListNode == NULL)
     {
-        printf("%s(%d):BV_PARAM_ERROR\n", __FUNCTION__, __LINE__);
         return BV_PARAM_ERROR;
     }
     if (pListHead->uiListLength != 0 && pListHead->itemCount == pListHead->uiListLength)
     {
-        printf("%s(%d):BV_LIST_OVER %d %d\n", __FUNCTION__, __LINE__, pListHead->itemCount, pListHead->uiListLength);
         return BV_LIST_OVER;
     }
     pListHead->next->prev = pListNode;
@@ -74,7 +72,6 @@ BV_RETURN bv_list_insert_node_from_head(BV_LIST_HANDLE listHandle, void *pvItem)
     pListHead->prev = pListHead;
     pListHead->next = pListNode;
     pListHead->itemCount++;
-    printf("%s(%d):pListNode=%p itemCount=%d\n", __FUNCTION__, __LINE__, pListNode, pListHead->itemCount);
     return BV_SUCCESS;
 }
 
@@ -84,12 +81,10 @@ BV_RETURN bv_list_insert_node_from_tail(BV_LIST_HANDLE listHandle, void *pvItem)
     pstListHead pListNode = (pstListHead)pvItem;
     if (pListHead == NULL || pListNode == NULL)
     {
-        printf("%s(%d):BV_PARAM_ERROR\n", __FUNCTION__, __LINE__);
         return BV_PARAM_ERROR;
     }
     if (pListHead->uiListLength != 0 && pListHead->itemCount == pListHead->uiListLength)
     {
-        printf("%s(%d):BV_LIST_OVER %d %d\n", __FUNCTION__, __LINE__, pListHead->itemCount, pListHead->uiListLength);
         return BV_LIST_OVER;
     }
     pListHead->prev->next = pListNode;
@@ -97,7 +92,7 @@ BV_RETURN bv_list_insert_node_from_tail(BV_LIST_HANDLE listHandle, void *pvItem)
     pListNode->next = pListHead;
     pListHead->prev = pListNode;
     pListHead->itemCount++;
-    printf("%s(%d):pListNode=%p itemCount=%d\n", __FUNCTION__, __LINE__, pListNode, pListHead->itemCount);
+
     return BV_SUCCESS;
 }
 
@@ -107,7 +102,6 @@ BV_RETURN bv_list_get_node_from_head(BV_LIST_HANDLE listHandle, void **ppvItem)
     pstListHead pListNode = pListHead->next;
     if (pListHead == NULL)
     {
-        printf("%s(%d):BV_PARAM_ERROR\n", __FUNCTION__, __LINE__);
         return BV_PARAM_ERROR;
     }
     if (pListNode == pListHead)
@@ -119,7 +113,6 @@ BV_RETURN bv_list_get_node_from_head(BV_LIST_HANDLE listHandle, void **ppvItem)
     pListHead->next = pListNode->next;
     *(ppvItem) = (void*)pListNode;
     pListHead->itemCount--;
-    printf("%s(%d):pListNode=%p itemCount=%d\n", __FUNCTION__, __LINE__, pListNode, pListHead->itemCount);
     return BV_SUCCESS;
 }
 
@@ -129,7 +122,6 @@ BV_RETURN bv_list_get_node_from_tail(BV_LIST_HANDLE listHandle, void **ppvItem)
     pstListHead pListNode = pListHead->prev;
     if (pListHead == NULL)
     {
-        printf("%s(%d):BV_PARAM_ERROR\n", __FUNCTION__, __LINE__);
         return BV_PARAM_ERROR;
     }
     if (pListNode == pListHead)
@@ -140,7 +132,6 @@ BV_RETURN bv_list_get_node_from_tail(BV_LIST_HANDLE listHandle, void **ppvItem)
     pListHead->prev = pListNode->prev;
     *(ppvItem) = (void *)pListNode;
     pListHead->itemCount--;
-    printf("%s(%d):pListNode=%p itemCount=%d\n", __FUNCTION__, __LINE__, pListNode, pListHead->itemCount);
     return BV_SUCCESS;
 }
 
@@ -150,7 +141,6 @@ BV_RETURN bv_list_delete_node(BV_LIST_HANDLE listHandle, void *pvItem)
     pstListHead pListNode = (pstListHead)pvItem;
     if (pListHead == NULL || pListNode == NULL)
     {
-        printf("%s(%d):BV_PARAM_ERROR\n", __FUNCTION__, __LINE__);
         return BV_PARAM_ERROR;
     }
     if (pListNode == pListHead)
@@ -160,8 +150,8 @@ BV_RETURN bv_list_delete_node(BV_LIST_HANDLE listHandle, void *pvItem)
     pListNode->prev->next = pListNode->next;
     pListNode->next->prev = pListNode->prev;
     free(pListNode);
+    pListNode = NULL;
     pListHead->itemCount--;
-    printf("%s(%d):pListNode=%p itemCount=%d\n", __FUNCTION__, __LINE__, pListNode, pListHead->itemCount);
     return BV_SUCCESS;
 }
 

@@ -2,7 +2,7 @@
 @author Bevis
 @date 2018-09-02
 
-/********************************************************************************************/
+********************************************************************************************/
 #include <bv_thread_pool.h>
 #include <bv_queue.h>
 #include <bv_list.h>
@@ -65,14 +65,22 @@ BV_THREADPOOL_HANDLE bv_threadpool_create(unsigned int uiThreadNum)
     
     if (uiThreadNum <= 0)
     {
-        printf("%s(%d):uiThreadNum=%d Error!!!\n", __FUNCTION__, __LINE__, uiThreadNum);
         return 0;
     }
-    printf("%s(%d):uiThreadNum=%d\n", __FUNCTION__, __LINE__, uiThreadNum);
+
     pThreadPool = (ThreadPool*)malloc(sizeof(ThreadPool));
+    if (pThreadPool == NULL)
+    {
+        return 0;
+    }
     pThreadPool->state = THREADPOOL_RUNNING;
     pThreadPool->thread_num = uiThreadNum;
     pThreadPool->tid_arr = (pthread_t*)malloc(uiThreadNum * sizeof(pthread_t));
+    if (pThreadPool->tid_arr == NULL)
+    {
+        free(pThreadPool);
+        return 0;
+    }
     pThreadPool->queue_handle = bv_queue_create(sizeof(ServiceQueue), 0);
     pthread_mutex_init(&pThreadPool->mutex, NULL);
     pthread_cond_init(&pThreadPool->cond, NULL);
@@ -81,7 +89,7 @@ BV_THREADPOOL_HANDLE bv_threadpool_create(unsigned int uiThreadNum)
         iRet = pthread_create(pThreadPool->tid_arr+iLoop, NULL, thread_func, pThreadPool);
         if ( iRet != 0 )
         {
-            fprintf(stderr, "pthread_create():%s\n", strerror(iRet));
+            free(pThreadPool);
             return 0;
         }
     }
@@ -96,6 +104,10 @@ BV_RETURN bv_threadpool_destroy(BV_THREADPOOL_HANDLE threadPoolHandle)
     int iLoop;
     
     pThreadPool = (ThreadPool *)threadPoolHandle;
+    if (pThreadPool == NULL)
+    {
+        return BV_PARAM_ERROR;
+    }
     pThreadPool->state = THREADPOOL_STOPPED;
     pthread_cond_broadcast(&pThreadPool->cond);
 
@@ -114,6 +126,7 @@ BV_RETURN bv_threadpool_destroy(BV_THREADPOOL_HANDLE threadPoolHandle)
 
     free(pThreadPool);
     pThreadPool = NULL;
+    return BV_SUCCESS;
 }
 
 
@@ -121,23 +134,27 @@ BV_RETURN bv_threadpool_add_request_service(BV_THREADPOOL_HANDLE threadPoolHandl
 {
     ThreadPool *pThreadPool;
     pServiceQueue pser;
+    BV_RETURN ret;
     pThreadPool = (ThreadPool *)threadPoolHandle;
     
     if (pThreadPool == NULL || serviceFun == NULL)
     {
-        printf("%s(%d):BV_PARAM_ERROR\n", __FUNCTION__, __LINE__);
         return BV_PARAM_ERROR;
     }
     
     pser = (pServiceQueue)malloc(sizeof(ServiceQueue));
+    if (pser == NULL)
+    {
+        return BV_FAILED;
+    }
     pser->pFun = serviceFun;
     pser->arg = arg;
 
     pthread_mutex_lock(&pThreadPool->mutex);
-    bv_queue_push(pThreadPool->queue_handle, pser);
+    ret = bv_queue_push(pThreadPool->queue_handle, pser);
     pthread_mutex_unlock(&pThreadPool->mutex);
     pthread_cond_signal(&pThreadPool->cond);
-    return BV_SUCCESS;
+    return ret;
 }
 
 

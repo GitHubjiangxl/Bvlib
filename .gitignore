@@ -1,4 +1,4 @@
 *.[oa]
 *.so
-./bin/*
-./lib/*
+/bin/
+/lib/

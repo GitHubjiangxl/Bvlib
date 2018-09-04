@@ -7,7 +7,7 @@ BV_OBJ_DIR = $(patsubst %.c,%.o,$(BV_SRC))
 BV_OBJ_NAME = $(notdir $(BV_OBJ_DIR))
 BV_OBJ = $(addprefix $(TOP_DIR)/bin/,$(BV_OBJ_NAME))
 BV_FILE = $(filter %$(*F).c, $(BV_SRC))
-TARGET=$(TOP_DIR)/bin/ThreadPool
+TARGET=$(TOP_DIR)/bin/Time
 
 all:
 	echo "$(CUR_DIR)"
