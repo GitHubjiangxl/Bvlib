@@ -9,7 +9,9 @@
 #include <bv_common.h>
 
 #define BV_LIST_MEMBER(type)type *prev;type *next
+
 typedef unsigned long BV_LIST_HANDLE;
+
 
 /********************************************************************************************
 @函数名称:
@@ -142,6 +144,63 @@ BV_SUCCESS:返回成功
 ********************************************************************************************/
 BV_RETURN bv_list_delete_node(BV_LIST_HANDLE listHandle, void *pvItem);
 
+/********************************************************************************************
+@函数名称:
+bv_list_find_node
+
+@函数功能:
+从链表中查找数据
+
+@函数参数:
+----IN
+listHandle:链表句柄
+pvItem:对比参数
+----OUT
+pComparefun:将节点指针通过此回调函数返回。
+
+@函数返回值
+其他值:节点地址
+NULL:没找到,或参数错误
+********************************************************************************************/
+void* bv_list_find_node(BV_LIST_HANDLE listHandle, pCompareFunc pCompareFun, void *pvItem);
+
+/********************************************************************************************
+@函数名称:
+bv_list_get_node_num
+
+@函数功能:
+获取链表中节点的数量
+
+@函数参数:
+----IN
+listHandle:链表句柄
+----OUT
+piNodeNum:整形指针，用于取出节点数量
+
+@函数返回值
+BV_SUCCESS:返回成功
+其他值:失败
+********************************************************************************************/
+BV_RETURN bv_list_get_node_num(BV_LIST_HANDLE listHandle, int* piNodeNum);
+
+/********************************************************************************************
+@函数名称:
+bv_list_get_node_num
+
+@函数功能:
+输出链表的所有节点地址，方便输出节点信息。
+
+@函数参数:
+----IN
+listHandle:链表句柄
+----OUT
+pShowNodeFun:取出节点地址
+
+@函数返回值
+BV_SUCCESS:返回成功
+其他值:失败
+********************************************************************************************/
+BV_RETURN bv_list_show_all_node(BV_LIST_HANDLE listHandle, pShowNodeFunc pShowNodeFun);
 
 #endif //__BV_LIST_H__
 

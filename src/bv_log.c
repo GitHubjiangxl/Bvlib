@@ -14,6 +14,8 @@
 #include <string.h>
 #include <stdarg.h>
 
+
+
 #define LOG_LEVEL_TAG 8
 
 #define LOG_FILE_STORAGE_DEFAULT_SIZE_M 8   //LOG文件默认上限为8M
@@ -91,7 +93,10 @@ BV_RETURN bv_log_close(BV_LOG_HANDLE logHandle)
     {
         return ret;
     }
-    fclose(pLogHead->FileId);
+    if (pLogHead->FileId != NULL)
+    {
+        fclose(pLogHead->FileId);
+    }
     free(pLogHead);
     pLogHead = NULL;
     return ret;
@@ -159,7 +164,7 @@ static void* bv_log_save(void *pvLog)
         }
         pLogInfo->logHead->ulFileSize += strlen(pLogInfo->log);
         fwrite(pLogInfo->log, strlen(pLogInfo->log), 1, pLogInfo->logHead->FileId);
-        //fllush(pLogInfo->logHead->FileId);
+        fflush(pLogInfo->logHead->FileId);
         free(pLogInfo);
         pLogInfo = NULL;
     }

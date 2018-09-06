@@ -27,4 +27,13 @@ typedef enum
     BV_TRUE = 1,
 }BV_BOOL;
 
+typedef enum
+{
+    BV_NODE_EXIT,
+    BV_NODE_NOEXIT,
+}BV_NODE_FIND;
+typedef BV_NODE_FIND (*pCompareFunc)(void*, void*);
+
+typedef void (*pShowNodeFunc)(void*);
+
 #endif //__BV_COMMON_H__

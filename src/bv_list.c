@@ -39,16 +39,16 @@ BV_RETURN bv_list_destroy(BV_LIST_HANDLE listHandle)
 {
     pstListHead pListHead = (pstListHead)listHandle;
     pstListHead pListNode = pListHead->next;
+    pstListHead pListTmp;
     if (pListHead == NULL)
     {
         return BV_PARAM_ERROR;
     }
-    for (pListNode; pListNode != pListHead; pListNode = pListHead->next)
+    while(pListNode != pListHead)
     {
-        pListNode->prev->next = pListNode->next;
-        pListNode->next->prev = pListNode->prev;
+        pListTmp = pListNode->next;
         free(pListNode);
-        pListNode = NULL;
+        pListNode = pListTmp;
         pListHead->itemCount--;
     }
     free(pListHead);
@@ -155,4 +155,50 @@ BV_RETURN bv_list_delete_node(BV_LIST_HANDLE listHandle, void *pvItem)
     return BV_SUCCESS;
 }
 
+void* bv_list_find_node(BV_LIST_HANDLE listHandle, pCompareFunc pComparefun, void *pvItem)
+{
+    pstListHead pListHead = (pstListHead)listHandle;
+    pstListHead pListNode = (pstListHead)pListHead->next;
+    if (pListHead == NULL || pListNode == NULL)
+    {
+        return NULL;
+    }
+    while (pListNode != pListHead)
+    {
+        if (pComparefun((void*)pListNode, pvItem) == BV_NODE_EXIT)
+        {
+            return (void*)pListNode;
+        }
+        pListNode = pListNode->next;
+    }
+    return NULL;
+}
+
+BV_RETURN bv_list_get_node_num(BV_LIST_HANDLE listHandle, int* piNodeNum)
+{
+    pstListHead pListHead = (pstListHead)listHandle;
+    if (pListHead == NULL || piNodeNum == NULL)
+    {
+        return BV_PARAM_ERROR;
+    }
+    *piNodeNum = pListHead->itemCount;
+    return BV_SUCCESS;
+}
+
+
+BV_RETURN bv_list_show_all_node(BV_LIST_HANDLE listHandle, pShowNodeFunc pShowNodeFun)
+{
+    pstListHead pListHead = (pstListHead)listHandle;
+    pstListHead pListNode = (pstListHead)pListHead->next;
+    if (pListHead == NULL || pShowNodeFun == NULL)
+    {
+        return BV_PARAM_ERROR;
+    }
+    while (pListNode != pListHead)
+    {
+        pShowNodeFun((void*)pListNode);
+        pListNode = pListNode->next;
+    }
+    return BV_SUCCESS;
+}
 

@@ -81,4 +81,62 @@ BV_SUCCESS:返回成功
 /********************************************************************************************/
 BV_RETURN bv_queue_pop(BV_QUEUE_HANDLE queueHandle, void** ppvItem);
 
+/********************************************************************************************
+@函数名称:
+bv_queue_find_node
+
+@函数功能:
+从队列中查找数据
+
+@函数参数:
+----IN
+listHandle:句柄
+pvItem:对比参数
+----OUT
+pComparefun:将节点指针通过此回调函数返回。
+
+@函数返回值
+其他值:节点地址
+NULL:没找到,或参数错误
+********************************************************************************************/
+void* bv_queue_find_node(BV_QUEUE_HANDLE queueHandle, pCompareFunc pCompareFun, void *pvItem);
+
+/********************************************************************************************
+@函数名称:
+bv_queue_get_node_num
+
+@函数功能:
+获取队列中节点的数量
+
+@函数参数:
+----IN
+listHandle:队列句柄
+----OUT
+piNodeNum:整形指针，用于取出节点数量
+
+@函数返回值
+BV_SUCCESS:返回成功
+其他值:失败
+********************************************************************************************/
+BV_RETURN bv_queue_get_node_num(BV_QUEUE_HANDLE queueHandle, int* piNodeNum);
+
+/********************************************************************************************
+@函数名称:
+bv_queue_show_all_node
+
+@函数功能:
+输出队列的所有节点地址，方便输出节点信息。
+
+@函数参数:
+----IN
+listHandle:队列句柄
+----OUT
+pShowNodeFun:取出节点地址
+
+@函数返回值
+BV_SUCCESS:返回成功
+其他值:失败
+********************************************************************************************/
+BV_RETURN bv_queue_show_all_node(BV_QUEUE_HANDLE queueHandle, pShowNodeFunc pShowNodeFun);
+
 #endif //__BV_QUEUE_H__
