@@ -36,4 +36,8 @@ typedef BV_NODE_FIND (*pCompareFunc)(void*, void*);
 
 typedef void (*pShowNodeFunc)(void*);
 
+#define BV_NODE_MEMBER(type)type *prev;type *next
+
+#define BV_SIZE_1M 1024 * 1024
+
 #endif //__BV_COMMON_H__

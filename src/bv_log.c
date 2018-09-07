@@ -20,6 +20,7 @@
 
 #define LOG_FILE_STORAGE_DEFAULT_SIZE_M 8   //LOG文件默认上限为8M
 #define LOG_DEFAULT_DEAL_THREAD_NUM 1       //默认的处理线程数量
+#define LOG_FILE_PATH_LENGTH 128            //log文件路径
 
 static char* log_level_tag[BV_LOG_LEVEL_ALL] = 
 {
@@ -34,9 +35,9 @@ static char* log_level_tag[BV_LOG_LEVEL_ALL] =
 typedef struct logHead
 {
     FILE *FileId;                               //文件句柄
-    unsigned int uiFileCount;                   //文件数量
+    char cFileName[LOG_FILE_PATH_LENGTH];       //文件名称
     unsigned long ulFileSize;                   //存储文件大小
-    unsigned int uiBlockSize;                 //文件存储上限
+    unsigned int uiBlockSize;                   //文件存储上限
     unsigned int uiThreadCount;                 //创建线程池中线程的数量
     BV_THREADPOOL_HANDLE LogThreadPoolHandle;   //线程池句柄
     BV_LOG_LEVEL LogLevel;                      //日志级别
@@ -53,8 +54,7 @@ typedef struct logInfo
 BV_LOG_HANDLE bv_log_create(const char *pcFile)
 {
     pstLogHead pLogHead;
-
-    if(pcFile == NULL)
+    if(pcFile == NULL || strlen(pcFile) >= LOG_FILE_PATH_LENGTH)
     {
         return 0;
     }
@@ -65,7 +65,9 @@ BV_LOG_HANDLE bv_log_create(const char *pcFile)
         free(pLogHead);
         return 0;
     }
-    
+    fseek(pLogHead->FileId, 0, SEEK_END);
+    pLogHead->ulFileSize = ftell(pLogHead->FileId);
+    fseek(pLogHead->FileId, 0, SEEK_SET);
     pLogHead->uiThreadCount = LOG_DEFAULT_DEAL_THREAD_NUM;
     pLogHead->LogThreadPoolHandle = bv_threadpool_create(pLogHead->uiThreadCount);
     if(pLogHead->LogThreadPoolHandle == 0)
@@ -73,9 +75,9 @@ BV_LOG_HANDLE bv_log_create(const char *pcFile)
         free(pLogHead);
         return 0;
     }
-    
+    memset(pLogHead->cFileName, 0x00, LOG_FILE_PATH_LENGTH);
+    strcpy(pLogHead->cFileName, pcFile);
     pLogHead->uiBlockSize = LOG_FILE_STORAGE_DEFAULT_SIZE_M * 1024 * 1024;
-    pLogHead->ulFileSize = 0;
     pLogHead->LogLevel = BV_LOG_LEVEL_ALL;
     return (BV_LOG_HANDLE)pLogHead;
 }
@@ -121,7 +123,7 @@ BV_RETURN bv_log_set_storage_block_size(BV_LOG_HANDLE logHandle, unsigned int ui
     {
         return BV_PARAM_ERROR;
     }
-    pLogHead->uiBlockSize = uiBlockSize * 1024 * 1024;
+    pLogHead->uiBlockSize = uiBlockSize * BV_SIZE_1M;
     return BV_SUCCESS;
 }
 
@@ -149,22 +151,34 @@ BV_RETURN bv_log_set_thread_num(BV_LOG_HANDLE logHandle, unsigned int uiThreadCo
     return BV_SUCCESS;
 }
 
-
-static void* bv_log_save(void *pvLog)
+static void* _bv_log_save(void *pvLog)
 {
     pstLogInfo pLogInfo = (pstLogInfo)pvLog;
     if (pLogInfo != NULL)
     {
-        if (pLogInfo->logHead->ulFileSize + strlen(pLogInfo->log) > pLogInfo->logHead->uiBlockSize)
+        if (pLogInfo->logHead->FileId != NULL)//再次创建新log文件时,由于系统原因可能会存在失败。
         {
-            //create a new file to storage[jiangxl]
-            //1,fclose(pLogInfo->logHead->FileId)
-            //2,pLogInfo->logHead->FileId = fopen
-            //3,pLogInfo->logHead->ulFileSize = 0
+            if (pLogInfo->logHead->ulFileSize + strlen(pLogInfo->log) >= pLogInfo->logHead->uiBlockSize)
+            {
+                //create a new file to storage
+                char buff[LOG_FILE_PATH_LENGTH + BV_TIME_NUM_LENGTH + 1];// +1 '_'
+                memset(buff, 0x00, sizeof(buff));
+                sprintf(buff, "%s_%s", pLogInfo->logHead->cFileName, bv_time_get_num());
+                fclose(pLogInfo->logHead->FileId);
+                rename(pLogInfo->logHead->cFileName, buff);
+                pLogInfo->logHead->FileId = fopen(pLogInfo->logHead->cFileName, "a+");
+                if (pLogInfo->logHead->FileId == NULL)
+                {
+                    printf("fopen %s error!!! \n", pLogInfo->logHead->cFileName);
+                    goto ERROR;
+                }
+                pLogInfo->logHead->ulFileSize = 0;
+            }
+            pLogInfo->logHead->ulFileSize += strlen(pLogInfo->log);
+            fwrite(pLogInfo->log, strlen(pLogInfo->log), 1, pLogInfo->logHead->FileId);
+            fflush(pLogInfo->logHead->FileId);
         }
-        pLogInfo->logHead->ulFileSize += strlen(pLogInfo->log);
-        fwrite(pLogInfo->log, strlen(pLogInfo->log), 1, pLogInfo->logHead->FileId);
-        fflush(pLogInfo->logHead->FileId);
+ERROR:
         free(pLogInfo);
         pLogInfo = NULL;
     }
@@ -198,7 +212,7 @@ BV_RETURN bv_log(BV_LOG_HANDLE logHandle, BV_LOG_LEVEL logLevel, char* pcLogInfo
     pLogInfo->logHead = pLogHead;
     memset(pLogInfo->log, 0x00, sizeof(pLogInfo->log));
     sprintf(pLogInfo->log, "%s%s%s%s", bv_time_get(), log_level_tag[logLevel], pcLogInfo, "\n\0");
-    ret = bv_threadpool_add_request_service(pLogHead->LogThreadPoolHandle, bv_log_save, (void*)pLogInfo);
+    ret = bv_threadpool_add_request_service(pLogHead->LogThreadPoolHandle, _bv_log_save, (void*)pLogInfo);
     if (ret != BV_SUCCESS)
     {
         free(pLogInfo);

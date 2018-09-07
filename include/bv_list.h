@@ -8,7 +8,7 @@
 
 #include <bv_common.h>
 
-#define BV_LIST_MEMBER(type)type *prev;type *next
+#define BV_LIST_MEMBER(type) BV_NODE_MEMBER(type)
 
 typedef unsigned long BV_LIST_HANDLE;
 

@@ -7,6 +7,8 @@
 #define __BV_QUEUE_H__
 
 #include <bv_common.h>
+
+#define BV_QUEUE_MEMBER(type) BV_NODE_MEMBER(type)
 typedef unsigned long BV_QUEUE_HANDLE;
 
 /********************************************************************************************

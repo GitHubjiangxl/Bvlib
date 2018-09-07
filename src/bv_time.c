@@ -33,10 +33,24 @@ char* bv_time_get(void)
     memset(timeinfo, 0x00, sizeof(timeinfo));
     clock_gettime(CLOCK_REALTIME, &time);  //获取相对于1970到现在的秒数
     localtime_r(&time.tv_sec, &nowTime);
-    sprintf(timeinfo, "[%04d-%02d-%02d %02d:%02d:%02d]", nowTime.tm_year + 1900, nowTime.tm_mon+1, nowTime.tm_mday, 
+    sprintf(timeinfo, "[%04d-%02d-%02d %02d:%02d:%02d]", nowTime.tm_year + 1900, nowTime.tm_mon + 1, nowTime.tm_mday, 
     nowTime.tm_hour, nowTime.tm_min, nowTime.tm_sec);
     return timeinfo;
 }
+
+char* bv_time_get_num(void)
+{
+    static char timeinfo[BV_TIME_NUM_LENGTH + 1];
+    struct timespec time;
+    struct tm nowTime;
+    memset(timeinfo, 0x00, sizeof(timeinfo));
+    clock_gettime(CLOCK_REALTIME, &time);  //获取相对于1970到现在的秒数
+    localtime_r(&time.tv_sec, &nowTime);
+    sprintf(timeinfo, "%04d%02d%02d%02d%02d%02d", nowTime.tm_year + 1900, nowTime.tm_mon + 1, nowTime.tm_mday, 
+    nowTime.tm_hour, nowTime.tm_min, nowTime.tm_sec);
+    return timeinfo;
+}
+
 
 BV_TIME_HANDLE bv_time_ms_start(void)
 {
